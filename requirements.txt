@@ -1,0 +1,6 @@
+streamlit
+openai
+pillow
+reportlab
+python-dotenv
+pymongo
