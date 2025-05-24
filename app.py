@@ -126,7 +126,7 @@ def generate_pdf(image_file, title, medium, sizes, prices, description_lines, bu
     c.drawString(margin, y, "Variants:")
     y -= 20
 
-    table_data = [["Variant", "Size", "Price (₹)"]] + [
+    table_data = [["Variant", "Size", "Price (rupees)"]] + [
         [k, sizes[k], f"{prices[k]:,}"] for k in ["Original", "Small", "Large"]
     ]
     table = Table(table_data, colWidths=[70, 130, 80])
