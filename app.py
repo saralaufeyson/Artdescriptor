@@ -16,10 +16,9 @@ from dotenv import load_dotenv
 import hashlib
 from pymongo import MongoClient
 
-# Load environment variables
-load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '.env'))
-openai.api_key = os.getenv("OPENAI_API_KEY")
-MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://root:123@cluster0.dtuqm.mongodb.net")
+# Use Streamlit secrets for sensitive keys
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+MONGO_URI = st.secrets["MONGO_URI"]
 
 # Streamlit config
 st.set_page_config(page_title="Painting Listing Generator", layout="centered")
@@ -270,3 +269,17 @@ if st.button("🧾 Export as A4 PDF"):
         )
         with open(pdf_path, "rb") as f:
             st.download_button("📥 Download PDF", data=f, file_name=f"{title}_listing.pdf", mime="application/pdf")
+
+# Check MongoDB connection
+try:
+    client.admin.command('ping')
+    st.success("Connected to MongoDB database.")
+except Exception as e:
+    st.error(f"Failed to connect to MongoDB: {e}")
+
+# Check OpenAI API connection
+try:
+    openai.Model.list()
+    st.success("Connected to OpenAI API.")
+except Exception as e:
+    st.error(f"Failed to connect to OpenAI API: {e}")
