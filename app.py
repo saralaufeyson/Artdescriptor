@@ -277,9 +277,10 @@ try:
 except Exception as e:
     st.error(f"Failed to connect to MongoDB: {e}")
 
-# Check OpenAI API connection
+# Check OpenAI API connection (compatible with openai>=1.0.0)
 try:
-    openai.Model.list()
+    openai_client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+    models = openai_client.models.list()
     st.success("Connected to OpenAI API.")
 except Exception as e:
     st.error(f"Failed to connect to OpenAI API: {e}")
