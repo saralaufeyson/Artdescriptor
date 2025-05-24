@@ -49,29 +49,32 @@ MONGO_URI=your_mongodb_uri
 
 streamlit run app.py
 ```
-###🧾 How It Works
-Upload your artwork or enter artwork details.
+## 🧾 How It Works
 
-The app checks MongoDB for existing entries based on the artwork's hash or title.
+1. **Upload your artwork** or enter artwork details.
+2. The app checks **MongoDB** for existing entries based on the artwork's **hash or title**.
+3. If it's a **new entry**, OpenAI generates a description.
+4. A **one-page PDF** is created with all metadata and description.
+5. The data is **saved in MongoDB** for future use.
 
-If it's a new entry, OpenAI generates a description.
+---
 
-A one-page PDF is created with all metadata and description.
+## 📌 To-Do / Future Enhancements
 
-The data is saved in MongoDB for future use.
+- 🔍 Add **image similarity matching** to detect duplicates  
+- 🖼️ Support for **multiple artworks in batch**  
+- ☁️ Deploy on **Streamlit Cloud** or **Hugging Face Spaces**  
+- 📧 **Email the generated PDF** to the user  
 
-###📌 To-Do / Future Enhancements
--🔍 Add image similarity matching to detect duplicates
+---
 
--🖼️ Support for multiple artworks in batch
+## 🤝 Contributing
 
--☁️ Deploy on Streamlit Cloud or Hugging Face Spaces
+Pull requests are welcome!  
+For major changes, please open an issue first to discuss what you would like to change.
 
--📧 Email the generated PDF to the user
+---
 
-##🤝 Contributing
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+## 📜 License
 
-##📜 License
-This project is licensed under the MIT License
-
+This project is licensed under the **MIT License**.
