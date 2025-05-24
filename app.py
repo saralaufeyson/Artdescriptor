@@ -182,10 +182,12 @@ with col2:
 # Input validation
 if uploaded_file:
     uploaded_file.seek(0, os.SEEK_END)
-    if uploaded_file.tell() > 5 * 1024 * 1024:
-        st.error("File size exceeds 5MB.")
-        uploaded_file = None
-    uploaded_file.seek(0)
+    if uploaded_file is not None:
+        if uploaded_file.tell() > 5 * 1024 * 1024:
+            st.error("File size exceeds 5MB.")
+            uploaded_file = None
+        else:
+            uploaded_file.seek(0)
 
 title = st.text_input("🎨 Painting Title")
 painting_id = st.text_input("🆔 Painting ID (required)")
