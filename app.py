@@ -8,19 +8,18 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 import tempfile
-from reportlab.platypus import Paragraph, Frame, SimpleDocTemplate
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import Paragraph, Frame
+from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib import colors
 from reportlab.platypus import Table, TableStyle
-from dotenv import load_dotenv
 import hashlib
 from pymongo import MongoClient
 
-# Use Streamlit secrets for sensitive keys
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+# Initialize OpenAI with new SDK format
+client_openai = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 MONGO_URI = st.secrets["MONGO_URI"]
 
-# Streamlit config
+# Streamlit UI setup
 st.set_page_config(page_title="Painting Listing Generator", layout="centered")
 st.title("🖼️ Painting Listing Generator for Amazon")
 
@@ -53,21 +52,26 @@ def calculate_variant_sizes(original_size):
 
 def generate_listing(image_base64, title, size, medium):
     prompt = (
-        f"You are a professional Amazon product copywriter for fine art...\n"
-        f"Title: {title}\nSize: {size}\nMedium: {medium}..."
+        f"You are a professional Amazon product copywriter for fine art.\n"
+        f"Title: {title}\nSize: {size}\nMedium: {medium}.\n"
+        f"Generate an engaging product description and bullet points."
     )
-    response = openai.ChatCompletion.create(
+
+    response = client_openai.chat.completions.create(
         model="gpt-4o",
         max_tokens=800,
         messages=[
             {"role": "system", "content": "You are an expert art marketing copywriter for e-commerce."},
-            {"role": "user", "content": [
-                {"type": "text", "text": prompt},
-                {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
-            ]}
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
+                ]
+            }
         ]
     )
-    return response['choices'][0]['message']['content']
+    return response.choices[0].message.content
 
 def extract_description_and_bullets(full_text):
     lines = full_text.strip().split("\n")
@@ -85,7 +89,6 @@ def generate_pdf(image_file, title, medium, sizes, prices, description_lines, bu
     width, height = A4
     margin = 40
 
-    # Draw border and header
     c.setStrokeColor(colors.HexColor("#444444"))
     c.setLineWidth(2)
     c.rect(margin/2, margin/2, width - margin, height - margin)
@@ -170,7 +173,7 @@ def generate_pdf(image_file, title, medium, sizes, prices, description_lines, bu
     c.save()
     return tmp_file.name
 
-# UI Layout
+# UI layout
 st.markdown("Upload a painting image and enter details to generate a professional product description and features.")
 col1, col2 = st.columns([1, 2])
 with col1:
@@ -182,12 +185,11 @@ with col2:
 # Input validation
 if uploaded_file:
     uploaded_file.seek(0, os.SEEK_END)
-    if uploaded_file is not None:
-        if uploaded_file.tell() > 5 * 1024 * 1024:
-            st.error("File size exceeds 5MB.")
-            uploaded_file = None
-        else:
-            uploaded_file.seek(0)
+    if uploaded_file.tell() > 5 * 1024 * 1024:
+        st.error("File size exceeds 5MB.")
+        uploaded_file = None
+    else:
+        uploaded_file.seek(0)
 
 title = st.text_input("🎨 Painting Title")
 painting_id = st.text_input("🆔 Painting ID (required)")
@@ -279,10 +281,9 @@ try:
 except Exception as e:
     st.error(f"Failed to connect to MongoDB: {e}")
 
-# Check OpenAI API connection (compatible with openai>=1.0.0)
+# Check OpenAI API connection
 try:
-    openai_client = openai.OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-    models = openai_client.models.list()
+    client_openai.models.list()
     st.success("Connected to OpenAI API.")
 except Exception as e:
     st.error(f"Failed to connect to OpenAI API: {e}")
